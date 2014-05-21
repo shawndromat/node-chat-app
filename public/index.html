@@ -2,16 +2,27 @@
 <html>
   <head>
     <script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
+    <script
+src="http://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.6.0/underscore-min.js"></script>
     <script src="/socket.io/socket.io.js"></script>
     <script src="/javascripts/chat.js"></script>
+    <script src="/javascripts/chat_ui.js"></script>
     <script>
       var socket = io.connect('http://localhost:8080');
-
       socket.on('broadcast', function (data) {
-        console.log(data);
-        $('#chat-response').append("<p>" + JSON.stringify(data) + "</p>");
+        $('#chat-response').append("<p>" + data.username +
+                                    ": " + data.message + "</p>");
+      });
+      socket.on('invalidUsername', function (msg) {
+        $('#username-msg').text(msg);
+      });
+      socket.on('validUsername', function (msg) {
+        $('#username-msg').text(msg);
+        $('#form-username').hide();
       })
       var newChat = new ChatApp.Chat(socket);
+      var newUI = new ChatApp.ChatUI();
+
     </script>
     <title>Super Cool Chat App</title>
   </head>
@@ -19,21 +30,35 @@
 
     <h1>You made it!</h1>
 
+    <form id="form-username"
+          action="index_submit"
+          method="get"
+          accept-charset="utf-8">
+
+      <label>
+        <input type="text" name="" value="" id="username">
+      </label>
+      <p><input type="submit" value="Submit username"></p>
+    </form>
+
+    <p id="username-msg"></p>
+
     <p id="chat-response"></p>
 
-    <form action="index_submit" method="get" accept-charset="utf-8">
+    <form id="form-chat"
+          action="index_submit"
+          method="get"
+          accept-charset="utf-8">
+
       <label>
         <input type="text"id="chat-text">
       </label>
 
       <p><input type="submit" id="submit-text" value="Talk!"></p>
     </form>
+
     <script type="text/javascript">
-    $('form').submit(function (event) {
-      event.preventDefault();
-      var text = $(this).find('#chat-text').val();
-      newChat.sendMessage(text);
-    })
+      newUI.chatHandler(newChat);
     </script>
   </body>
 </html>
